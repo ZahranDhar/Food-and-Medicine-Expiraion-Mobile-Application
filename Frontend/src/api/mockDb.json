@@ -1,0 +1,230 @@
+{
+  "users": [
+    {
+      "_id": "usr_demo_001",
+      "username": "demo_user",
+      "firstName": "Alex",
+      "lastName": "Johnson",
+      "email": "demo@pantry.app",
+      "password": "demo1234"
+    }
+  ],
+  "products": [
+    {
+      "_id": "prd_001",
+      "title": "Organic Whole Milk 2L",
+      "image": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-30",
+      "createdAt": "2026-06-01T10:00:00.000Z",
+      "category": "Dairy"
+    },
+    {
+      "_id": "prd_002",
+      "title": "Greek Yogurt Strawberry",
+      "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-07-13",
+      "createdAt": "2026-06-03T09:30:00.000Z",
+      "category": "Dairy"
+    },
+    {
+      "_id": "prd_003",
+      "title": "Free Range Eggs (12 pack)",
+      "image": "https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-07-12",
+      "createdAt": "2026-06-04T08:00:00.000Z",
+      "category": "Dairy"
+    },
+    {
+      "_id": "prd_004",
+      "title": "Sourdough Bread Loaf",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-25",
+      "createdAt": "2026-06-01T11:00:00.000Z",
+      "category": "Bakery"
+    },
+    {
+      "_id": "prd_005",
+      "title": "Cheddar Cheese Block",
+      "image": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-07-15",
+      "createdAt": "2026-06-01T12:00:00.000Z",
+      "category": "Dairy"
+    },
+    {
+      "_id": "prd_006",
+      "title": "Fresh Spinach Bundle",
+      "image": "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-28",
+      "createdAt": "2026-06-07T07:00:00.000Z",
+      "category": "Vegetables"
+    },
+    {
+      "_id": "prd_007",
+      "title": "Red Apples Bag (1kg)",
+      "image": "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-29",
+      "createdAt": "2026-06-10T08:00:00.000Z",
+      "category": "Fruits"
+    },
+    {
+      "_id": "prd_008",
+      "title": "Ripe Bananas (6 pack)",
+      "image": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-21",
+      "createdAt": "2026-06-12T09:00:00.000Z",
+      "category": "Fruits"
+    },
+    {
+      "_id": "prd_009",
+      "title": "Strawberry Pint",
+      "image": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-19",
+      "createdAt": "2026-06-13T07:30:00.000Z",
+      "category": "Fruits"
+    },
+    {
+      "_id": "prd_010",
+      "title": "Chicken Breast (500g)",
+      "image": "https://images.unsplash.com/photo-1604503468506-a8da13d11d36?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-18",
+      "createdAt": "2026-06-14T10:00:00.000Z",
+      "category": "Meat"
+    },
+    {
+      "_id": "prd_011",
+      "title": "Ground Beef 300g",
+      "image": "https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-17",
+      "createdAt": "2026-06-14T11:00:00.000Z",
+      "category": "Meat"
+    },
+    {
+      "_id": "prd_012",
+      "title": "Atlantic Salmon Fillet",
+      "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-18",
+      "createdAt": "2026-06-14T12:00:00.000Z",
+      "category": "Seafood"
+    },
+    {
+      "_id": "prd_013",
+      "title": "Ibuprofen 400mg (20 tabs)",
+      "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2027-03-01",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "category": "Medicines"
+    },
+    {
+      "_id": "prd_014",
+      "title": "Vitamin C Supplements (60 caps)",
+      "image": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2027-12-01",
+      "createdAt": "2026-06-01T09:00:00.000Z",
+      "category": "Medicines"
+    },
+    {
+      "_id": "prd_015",
+      "title": "Tomato Pasta Sauce (jar)",
+      "image": "https://images.unsplash.com/photo-1608897013039-887f21d8c804?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2027-01-15",
+      "createdAt": "2026-06-05T10:00:00.000Z",
+      "category": "Canned Goods"
+    },
+    {
+      "_id": "prd_016",
+      "title": "Chickpeas Can (400g)",
+      "image": "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2027-06-01",
+      "createdAt": "2026-06-06T08:00:00.000Z",
+      "category": "Canned Goods"
+    },
+    {
+      "_id": "prd_017",
+      "title": "Orange Juice 1L",
+      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-07-10",
+      "createdAt": "2026-06-08T09:00:00.000Z",
+      "category": "Beverages"
+    },
+    {
+      "_id": "prd_018",
+      "title": "Sparkling Water 6-pack",
+      "image": "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-12-31",
+      "createdAt": "2026-06-09T11:00:00.000Z",
+      "category": "Beverages"
+    },
+    {
+      "_id": "prd_019",
+      "title": "Dark Chocolate Bar 70%",
+      "image": "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-09-20",
+      "createdAt": "2026-06-10T10:00:00.000Z",
+      "category": "Snacks"
+    },
+    {
+      "_id": "prd_020",
+      "title": "Sea Salt Crackers (pack)",
+      "image": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-08-15",
+      "createdAt": "2026-06-10T11:00:00.000Z",
+      "category": "Snacks"
+    },
+    {
+      "_id": "prd_021",
+      "title": "Frozen Mixed Vegetables (500g)",
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-12-01",
+      "createdAt": "2026-06-11T08:00:00.000Z",
+      "category": "Frozen"
+    },
+    {
+      "_id": "prd_022",
+      "title": "Frozen Pizza Margherita",
+      "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-10-30",
+      "createdAt": "2026-06-11T09:00:00.000Z",
+      "category": "Frozen"
+    },
+    {
+      "_id": "prd_023",
+      "title": "Baby Carrots (300g)",
+      "image": "https://images.unsplash.com/photo-1445282768818-728615cc910a?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-27",
+      "createdAt": "2026-06-12T07:00:00.000Z",
+      "category": "Vegetables"
+    },
+    {
+      "_id": "prd_024",
+      "title": "Whole Grain Croissants (4 pack)",
+      "image": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80",
+      "email": "demo@pantry.app",
+      "expirationDate": "2026-06-20",
+      "createdAt": "2026-06-13T06:00:00.000Z",
+      "category": "Bakery"
+    }
+  ]
+}

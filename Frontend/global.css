@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Remove browser default focus outline on all inputs (React Native Web) */
+input:focus,
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
