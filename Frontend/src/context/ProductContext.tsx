@@ -11,7 +11,12 @@ interface ProductContextType {
   statistics: ProductStatistics;
   fetchProducts: () => Promise<void>;
   refreshProducts: () => Promise<void>;
-  addProduct: (title: string, imageUri: string, category?: string) => Promise<Product>;
+  addProduct: (
+    title: string,
+    labelImageUri: string,
+    productImageUri: string,
+    category?: string
+  ) => Promise<Product>;
   deleteProduct: (id: string) => Promise<void>;
   clearError: () => void;
 }
@@ -53,24 +58,39 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, []);
 
-  const addProduct = useCallback(async (title: string, imageUri: string, category?: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newProduct = await productApi.addProduct(title, imageUri, category);
-      setProducts((prev) => {
-        const updated = [...prev, newProduct];
-        syncProductNotifications(updated).catch(err => console.log('Error syncing notifications:', err));
-        return updated;
-      });
-      return newProduct;
-    } catch (err: any) {
-      setError(err.message || 'Failed to add product');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const addProduct = useCallback(
+    async (
+      title: string,
+      labelImageUri: string,
+      productImageUri: string,
+      category?: string
+    ) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const newProduct = await productApi.addProduct(
+          title,
+          labelImageUri,
+          productImageUri,
+          category
+        );
+        setProducts((prev) => {
+          const updated = [...prev, newProduct];
+          syncProductNotifications(updated).catch((err) =>
+            console.log('Error syncing notifications:', err)
+          );
+          return updated;
+        });
+        return newProduct;
+      } catch (err: any) {
+        setError(err.message || 'Failed to add product');
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   const deleteProduct = useCallback(async (id: string) => {
     setIsLoading(true);

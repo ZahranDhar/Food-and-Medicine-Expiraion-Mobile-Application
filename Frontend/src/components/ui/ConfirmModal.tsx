@@ -14,8 +14,11 @@ interface ConfirmModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
+  variant?: 'danger' | 'success' | 'info';
+  icon?: string;
+  showCancel?: boolean;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -25,19 +28,45 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   destructive = false,
+  variant,
+  icon,
+  showCancel = true,
   onConfirm,
   onCancel,
 }) => {
+  const resolvedVariant = variant || (destructive ? 'danger' : 'info');
+
+  let iconBgColor = '#f0fdf4';
+  let iconEmoji = '❓';
+  let confirmBtnBgColor = '#10b981';
+
+  if (resolvedVariant === 'danger') {
+    iconBgColor = '#fef2f2';
+    iconEmoji = icon || '🗑️';
+    confirmBtnBgColor = '#ef4444';
+  } else if (resolvedVariant === 'success') {
+    iconBgColor = '#e8f5e9'; // soft green success background
+    iconEmoji = icon || '🎉';
+    confirmBtnBgColor = '#10b981';
+  } else {
+    // info
+    iconBgColor = '#f0fdf4';
+    iconEmoji = icon || '❓';
+    confirmBtnBgColor = '#10b981';
+  }
+
+  const handleDismiss = onCancel || onConfirm;
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onCancel}
+      onRequestClose={handleDismiss}
       statusBarTranslucent
     >
       {/* Dimmed backdrop — tap outside to cancel */}
-      <TouchableWithoutFeedback onPress={onCancel}>
+      <TouchableWithoutFeedback onPress={handleDismiss}>
         <View
           style={{
             flex: 1,
@@ -69,14 +98,14 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                   width: 56,
                   height: 56,
                   borderRadius: 28,
-                  backgroundColor: destructive ? '#fef2f2' : '#f0fdf4',
+                  backgroundColor: iconBgColor,
                   justifyContent: 'center',
                   alignItems: 'center',
                   marginBottom: 16,
                   alignSelf: 'center',
                 }}
               >
-                <Text style={{ fontSize: 26 }}>{destructive ? '🗑️' : '❓'}</Text>
+                <Text style={{ fontSize: 26 }}>{iconEmoji}</Text>
               </View>
 
               {/* Title */}
@@ -108,27 +137,29 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               {/* Buttons */}
               <View style={{ flexDirection: 'row', gap: 12 }}>
                 {/* Cancel */}
-                <TouchableOpacity
-                  onPress={onCancel}
-                  activeOpacity={0.75}
-                  style={{
-                    flex: 1,
-                    paddingVertical: 14,
-                    borderRadius: 16,
-                    backgroundColor: '#f1f5f9',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text
+                {showCancel && onCancel && (
+                  <TouchableOpacity
+                    onPress={onCancel}
+                    activeOpacity={0.75}
                     style={{
-                      fontSize: 14,
-                      fontWeight: '700',
-                      color: '#475569',
+                      flex: 1,
+                      paddingVertical: 14,
+                      borderRadius: 16,
+                      backgroundColor: '#f1f5f9',
+                      alignItems: 'center',
                     }}
                   >
-                    {cancelLabel}
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: '700',
+                        color: '#475569',
+                      }}
+                    >
+                      {cancelLabel}
+                    </Text>
+                  </TouchableOpacity>
+                )}
 
                 {/* Confirm */}
                 <TouchableOpacity
@@ -138,7 +169,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     flex: 1,
                     paddingVertical: 14,
                     borderRadius: 16,
-                    backgroundColor: destructive ? '#ef4444' : '#10b981',
+                    backgroundColor: confirmBtnBgColor,
                     alignItems: 'center',
                   }}
                 >

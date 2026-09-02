@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Alert, Platform, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import { useProducts } from '../../context/ProductContext';
@@ -8,16 +8,9 @@ import ScreenContainer from '../../components/layout/ScreenContainer';
 import Header from '../../components/layout/Header';
 import AppInput from '../../components/ui/AppInput';
 import AppButton from '../../components/ui/AppButton';
+import ConfirmModal from '../../components/ui/ConfirmModal';
 
 type AddProductScreenProps = NativeStackScreenProps<AppStackParamList, 'AddProduct'>;
-
-const PLACEHOLDER_IMAGES = [
-  'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80',
-  'https://images.unsplash.com/photo-1607305387299-a3d9611cd469?w=400&q=80',
-  'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400&q=80',
-  'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&q=80',
-  'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80',
-];
 
 const CATEGORIES = [
   { label: '🍎 Fruits', value: 'Fruits' },
@@ -38,100 +31,132 @@ export const AddProductScreen: React.FC<AddProductScreenProps> = ({ navigation }
   const { addProduct } = useProducts();
 
   const [title, setTitle] = useState('');
-  const [imageUri, setImageUri] = useState<string | null>(null);
-  const [imageUrlInput, setImageUrlInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
 
+  // Two separate image states
+  const [labelImageUri, setLabelImageUri] = useState<string | null>(null);
+  const [productImageUri, setProductImageUri] = useState<string | null>(null);
+
+  // Error states
   const [titleError, setTitleError] = useState('');
-  const [imageError, setImageError] = useState('');
   const [categoryError, setCategoryError] = useState('');
+  const [labelImageError, setLabelImageError] = useState('');
+  const [productImageError, setProductImageError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
-  const isWeb = Platform.OS === 'web';
+  // Alert/Modal state
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    variant?: 'success' | 'danger' | 'info';
+    icon?: string;
+    confirmLabel?: string;
+    showCancel?: boolean;
+    onConfirm: () => void;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
-  // Gallery picker (native only)
-  const pickFromGallery = async () => {
-    setImageError('');
+  const showAlert = (
+    title: string,
+    message: string,
+    onConfirm: () => void = () => setAlertConfig((prev) => ({ ...prev, visible: false })),
+    variant: 'success' | 'danger' | 'info' = 'info',
+    icon?: string,
+    confirmLabel: string = 'OK',
+    showCancel: boolean = false
+  ) => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      variant,
+      icon,
+      confirmLabel,
+      showCancel,
+      onConfirm,
+    });
+  };
+
+  // ─── Image Picker Helpers ──────────────────────────────────────────────────
+
+  const pickImage = async (
+    target: 'label' | 'product',
+    source: 'camera' | 'gallery'
+  ) => {
+    if (target === 'label') setLabelImageError('');
+    if (target === 'product') setProductImageError('');
+
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'We need access to your gallery to choose photos.');
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setImageUri(result.assets[0].uri);
-        setImageUrlInput('');
+      if (source === 'camera') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          showAlert(
+            'Permission Denied',
+            'We need camera access to capture photos.',
+            undefined,
+            'info',
+            '⚠️'
+          );
+          return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ['images'],
+          allowsEditing: false,
+          quality: 0.5,
+        });
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+          if (target === 'label') setLabelImageUri(result.assets[0].uri);
+          else setProductImageUri(result.assets[0].uri);
+        }
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          showAlert(
+            'Permission Denied',
+            'We need access to your gallery to choose photos.',
+            undefined,
+            'info',
+            '⚠️'
+          );
+          return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: false,
+          quality: 0.5,
+        });
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+          if (target === 'label') setLabelImageUri(result.assets[0].uri);
+          else setProductImageUri(result.assets[0].uri);
+        }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to pick image from gallery');
+      showAlert(
+        'Error',
+        `Failed to select photo for ${target === 'label' ? 'expiration label' : 'product'}`,
+        undefined,
+        'danger',
+        '⚠️'
+      );
     }
   };
 
-  // Camera picker (native only)
-  const takePhoto = async () => {
-    setImageError('');
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'We need camera access to capture photos.');
-        return;
-      }
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setImageUri(result.assets[0].uri);
-        setImageUrlInput('');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to initialize camera');
-    }
-  };
-
-  // Use a random placeholder image
-  const useRandomPlaceholder = () => {
-    const url = PLACEHOLDER_IMAGES[Math.floor(Math.random() * PLACEHOLDER_IMAGES.length)];
-    setImageUri(url);
-    setImageUrlInput(url);
-    setImageError('');
-  };
-
-  // Apply typed URL
-  const applyImageUrl = () => {
-    if (imageUrlInput.trim().startsWith('http')) {
-      setImageUri(imageUrlInput.trim());
-      setImageError('');
-    } else {
-      setImageError('Please enter a valid image URL (starting with http)');
-    }
-  };
+  // ─── Validation ────────────────────────────────────────────────────────────
 
   const validate = (): boolean => {
     let isValid = true;
     setTitleError('');
-    setImageError('');
     setCategoryError('');
+    setLabelImageError('');
+    setProductImageError('');
 
     if (!title.trim()) {
       setTitleError('Product title is required');
-      isValid = false;
-    }
-
-    const effectiveImage = imageUri || imageUrlInput.trim();
-    if (!effectiveImage) {
-      setImageError(
-        isWeb
-          ? 'Please enter an image URL or use a random placeholder'
-          : 'Please select or capture a product image'
-      );
       isValid = false;
     }
 
@@ -140,125 +165,205 @@ export const AddProductScreen: React.FC<AddProductScreenProps> = ({ navigation }
       isValid = false;
     }
 
+    if (!labelImageUri) {
+      setLabelImageError('Expiration / Label photo is required for OCR date detection');
+      isValid = false;
+    }
+
+    if (!productImageUri) {
+      setProductImageError('Product photograph is required for display');
+      isValid = false;
+    }
+
     return isValid;
   };
 
+  // ─── Form Submission ───────────────────────────────────────────────────────
+
   const handleSubmit = async () => {
     if (!validate()) return;
-
-    const effectiveImage =
-      imageUri || imageUrlInput.trim() || PLACEHOLDER_IMAGES[0];
+    if (!labelImageUri || !productImageUri) return;
 
     setIsUploading(true);
     try {
-      const newProduct = await addProduct(title.trim(), effectiveImage, selectedCategory);
-      Alert.alert(
+      const newProduct = await addProduct(
+        title.trim(),
+        labelImageUri,
+        productImageUri,
+        selectedCategory
+      );
+      showAlert(
         'Product Added 🎉',
         `"${newProduct.title}" was registered under ${newProduct.category}.`,
-        [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
+        () => {
+          setAlertConfig((prev) => ({ ...prev, visible: false }));
+          navigation.navigate('Home');
+        },
+        'success',
+        '🎉',
+        'OK',
+        false
       );
     } catch (error: any) {
-      Alert.alert('Upload Failed', error.message || 'Could not add product. Please try again.');
+      if (error.status === 422) {
+        showAlert(
+          'Expiration Date Not Detected 🔍',
+          error.message ||
+            'Could not find a valid expiration date in the label image. Please take a clearer photo showing the expiry date label and try again.',
+          undefined,
+          'info',
+          '🔍',
+          'OK',
+          false
+        );
+      } else {
+        showAlert(
+          'Upload Failed',
+          error.message || 'Could not add product. Please try again.',
+          undefined,
+          'danger',
+          '⚠️',
+          'OK',
+          false
+        );
+      }
     } finally {
       setIsUploading(false);
     }
   };
 
+  // ─── Camera Icon Component ─────────────────────────────────────────────────
+
+  const CameraIcon = () => (
+    <View className="items-center justify-center mb-3">
+      {/* Shutter button */}
+      <View className="w-4 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-t-sm -mb-px" />
+      {/* Camera Body */}
+      <View className="w-16 h-11 bg-slate-50 dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-500 rounded-xl items-center justify-center">
+        {/* Lens */}
+        <View className="w-7 h-7 rounded-full border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-900 items-center justify-center">
+          {/* Lens inner circle */}
+          <View className="w-3 h-3 rounded-full bg-slate-400 dark:bg-slate-500" />
+        </View>
+      </View>
+    </View>
+  );
+
+  // ─── Helper component for Image Card ───────────────────────────────────────
+
+  const renderImageCard = (
+    title: string,
+    imageUri: string | null,
+    errorText: string,
+    onRemove: () => void,
+    onCamera: () => void,
+    onGallery: () => void
+  ) => (
+    <View className="mb-6">
+      <View className="mb-2 ml-1">
+        <Text className="text-xs font-bold text-slate-500 dark:text-slate-400">
+          {title}
+        </Text>
+      </View>
+
+      <View className="bg-white dark:bg-slate-900 rounded-[28px] border border-slate-100 dark:border-slate-850 p-4 shadow-sm items-center">
+        {imageUri ? (
+          <View className="w-full">
+            <Image
+              source={{ uri: imageUri }}
+              className="w-full h-48 rounded-2xl bg-slate-100 mb-3"
+              resizeMode="cover"
+            />
+            <TouchableOpacity
+              onPress={onRemove}
+              className="bg-slate-50 dark:bg-slate-800 py-2.5 rounded-xl items-center"
+            >
+              <Text className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {'Remove Image'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View className="w-full py-4 items-center">
+            <CameraIcon />
+            <Text className="text-xs font-semibold text-slate-600 dark:text-slate-300 text-center mb-3">
+              {'No Photo Selected'}
+            </Text>
+
+            <View className="flex-row justify-center w-full px-2">
+              <TouchableOpacity
+                onPress={onCamera}
+                className="bg-emerald-500 active:bg-emerald-600 py-2.5 px-4 rounded-xl flex-1 mr-2 items-center"
+              >
+                <Text className="text-xs font-bold text-white">{'Use Camera'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onGallery}
+                className="bg-slate-100 active:bg-slate-200 dark:bg-slate-800 py-2.5 px-4 rounded-xl flex-1 ml-2 items-center"
+              >
+                <Text className="text-xs font-bold text-slate-800 dark:text-slate-200">{'Open Gallery'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
+
+      {errorText ? (
+        <Text className="text-rose-500 text-xs mt-1.5 ml-2 font-medium">
+          {errorText}
+        </Text>
+      ) : null}
+    </View>
+  );
+
   return (
     <ScreenContainer safeArea={true} scrollable={true}>
       <Header title="Add Product" showBack={true} />
 
+      <ConfirmModal
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        icon={alertConfig.icon}
+        confirmLabel={alertConfig.confirmLabel}
+        showCancel={alertConfig.showCancel}
+        onConfirm={alertConfig.onConfirm}
+        onCancel={() => setAlertConfig((prev) => ({ ...prev, visible: false }))}
+      />
+
       <View className="p-5 bg-slate-50 dark:bg-slate-950 flex-1 pb-10">
+        {/* Section 1: Expiration / Label Image */}
+        {renderImageCard(
+          '1. EXPIRATION / LABEL IMAGE',
+          labelImageUri,
+          labelImageError,
+          () => setLabelImageUri(null),
+          () => pickImage('label', 'camera'),
+          () => pickImage('label', 'gallery')
+        )}
 
-        {/* Image Section */}
-        <Text className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 ml-1">
-          {'PRODUCT PHOTO'}
-        </Text>
-
-        <View className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-850 p-4 shadow-sm items-center mb-6">
-          {imageUri ? (
-            <View className="w-full">
-              <Image
-                source={{ uri: imageUri }}
-                className="w-full h-56 rounded-2xl bg-slate-100 mb-4"
-                resizeMode="cover"
-              />
-              <TouchableOpacity
-                onPress={() => { setImageUri(null); setImageUrlInput(''); }}
-                className="bg-slate-50 dark:bg-slate-800 py-3 rounded-xl items-center"
-              >
-                <Text className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {'Remove Image'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View className="w-full py-6 items-center">
-              <Text className="text-5xl mb-4">📸</Text>
-              <Text className="text-sm font-semibold text-slate-700 dark:text-slate-300 text-center mb-1">
-                {'No Photo Selected'}
-              </Text>
-
-              {/* Web: URL input */}
-              {isWeb ? (
-                <View className="w-full mt-4">
-                  <AppInput
-                    label="IMAGE URL"
-                    placeholder="https://images.unsplash.com/..."
-                    value={imageUrlInput}
-                    onChangeText={setImageUrlInput}
-                    autoCapitalize="none"
-                    keyboardType="url"
-                  />
-                  <View className="flex-row justify-center w-full mb-2">
-                    <TouchableOpacity
-                      onPress={applyImageUrl}
-                      className="bg-emerald-500 active:bg-emerald-600 py-3 px-5 rounded-xl flex-1 mr-2 items-center"
-                    >
-                      <Text className="text-xs font-bold text-white">{'Use This URL'}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={useRandomPlaceholder}
-                      className="bg-slate-100 active:bg-slate-200 dark:bg-slate-800 py-3 px-5 rounded-xl flex-1 ml-2 items-center"
-                    >
-                      <Text className="text-xs font-bold text-slate-800 dark:text-slate-200">{'Random Image'}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : (
-                /* Native: Camera / Gallery */
-                <View className="flex-row justify-center w-full px-4 mt-4">
-                  <TouchableOpacity
-                    onPress={takePhoto}
-                    className="bg-emerald-500 active:bg-emerald-600 py-3 px-5 rounded-xl flex-1 mr-2 items-center"
-                  >
-                    <Text className="text-xs font-bold text-white">{'Use Camera'}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={pickFromGallery}
-                    className="bg-slate-100 active:bg-slate-200 dark:bg-slate-800 py-3 px-5 rounded-xl flex-1 ml-2 items-center"
-                  >
-                    <Text className="text-xs font-bold text-slate-800 dark:text-slate-200">{'Open Gallery'}</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
-
-          {imageError ? (
-            <Text className="text-xs font-medium text-red-500 mt-2">{imageError}</Text>
-          ) : null}
-        </View>
+        {/* Section 2: Actual Product Photograph */}
+        {renderImageCard(
+          '2. ACTUAL PRODUCT IMAGE',
+          productImageUri,
+          productImageError,
+          () => setProductImageUri(null),
+          () => pickImage('product', 'camera'),
+          () => pickImage('product', 'gallery')
+        )}
 
         {/* Product Title */}
-        <View className="bg-white dark:bg-slate-900 p-5 rounded-[32px] border border-slate-100 dark:border-slate-850 shadow-sm mb-6">
+        <View className="mb-5">
           <AppInput
-            label="PRODUCT NAME / TITLE"
-            placeholder="e.g. Organic Milk 2L"
+            label="PRODUCT TITLE"
+            placeholder="e.g. Organic Whole Milk 2L"
             value={title}
-            onChangeText={setTitle}
+            onChangeText={(text) => {
+              setTitle(text);
+              if (titleError) setTitleError('');
+            }}
             error={titleError}
-            editable={!isUploading}
           />
         </View>
 
@@ -266,42 +371,50 @@ export const AddProductScreen: React.FC<AddProductScreenProps> = ({ navigation }
         <Text className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 ml-1">
           {'CATEGORY'}
         </Text>
-        <View className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-850 p-5 shadow-sm mb-6">
-          <View className="flex-row flex-wrap">
-            {CATEGORIES.map((cat) => {
-              const isSelected = selectedCategory === cat.value;
-              return (
-                <TouchableOpacity
-                  key={cat.value}
-                  onPress={() => { setSelectedCategory(cat.value); setCategoryError(''); }}
-                  className={`mr-2 mb-2 px-4 py-2 rounded-full border ${isSelected
-                      ? 'bg-emerald-500 border-emerald-500'
-                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-                    }`}
-                  activeOpacity={0.7}
+        <View className="flex-row flex-wrap mb-4">
+          {CATEGORIES.map((cat) => {
+            const isSelected = selectedCategory === cat.value;
+            return (
+              <TouchableOpacity
+                key={cat.value}
+                onPress={() => {
+                  setSelectedCategory(cat.value);
+                  if (categoryError) setCategoryError('');
+                }}
+                className={`mr-2 mb-2 px-3.5 py-2 rounded-xl border ${
+                  isSelected
+                    ? 'bg-emerald-50 border-emerald-500 dark:bg-emerald-950/40 dark:border-emerald-500'
+                    : 'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-semibold ${
+                    isSelected
+                      ? 'text-emerald-700 dark:text-emerald-400'
+                      : 'text-slate-700 dark:text-slate-300'
+                  }`}
                 >
-                  <Text className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          {categoryError ? (
-            <Text className="text-xs font-medium text-red-500 mt-2">{categoryError}</Text>
-          ) : null}
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
+        {categoryError ? (
+          <Text className="text-rose-500 text-xs mb-4 ml-2 font-medium">
+            {categoryError}
+          </Text>
+        ) : null}
 
-        {/* Submit */}
-        <View className="px-2">
+        {/* Submit Button */}
+        <View className="mt-4 mb-8">
           <AppButton
-            title="Add Product"
+            title={isUploading ? 'Extracting Expiry & Uploading...' : 'Add Product'}
             onPress={handleSubmit}
             isLoading={isUploading}
-            disabled={isUploading}
+            variant="primary"
           />
         </View>
-
       </View>
     </ScreenContainer>
   );

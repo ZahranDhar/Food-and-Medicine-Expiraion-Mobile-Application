@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, ActivityIndicator, Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useProducts } from '../../context/ProductContext';
@@ -8,6 +8,7 @@ import Header from '../../components/layout/Header';
 import AppButton from '../../components/ui/AppButton';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import { getDaysRemaining, getFreshnessStatus, formatDate } from '../../utils/date';
+import { resolveImageUrl } from '../../utils/image';
 
 type ProductDetailScreenProps = NativeStackScreenProps<AppStackParamList, 'ProductDetail'>;
 
@@ -16,9 +17,18 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ route,
   const { products, deleteProduct } = useProducts();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   // Retrieve matching product from context
   const product = products.find((p) => p._id === productId);
+
+  useEffect(() => {
+    if (product) {
+      console.log('[PRODUCT DETAIL] product:', product.title);
+      console.log('[PRODUCT DETAIL] image URL:', product.image || '(empty)');
+    }
+  }, [product]);
 
   if (!product) {
     return (
@@ -97,11 +107,31 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ route,
         <View className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-850 shadow-sm overflow-hidden mb-6">
           
           {/* Large Image */}
-          <Image
-            source={{ uri: product.image }}
-            className="w-full h-72 bg-slate-100 dark:bg-slate-800"
-            resizeMode="cover"
-          />
+          <View className="w-full h-72 bg-slate-100 dark:bg-slate-800">
+            {product.image ? (
+              <Image
+                source={{ uri: resolveImageUrl(product.image) }}
+                style={{ width: '100%', height: 288 }}
+                resizeMode="cover"
+                onLoadStart={() => { setImageLoading(true); setImageError(false); }}
+                onLoad={() => setImageLoading(false)}
+                onError={() => { setImageLoading(false); setImageError(true); }}
+              />
+            ) : null}
+            {imageLoading && product.image ? (
+              <ActivityIndicator
+                size="large"
+                color="#10b981"
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+            ) : null}
+            {(imageError || !product.image) ? (
+              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 40 }}>📦</Text>
+                <Text style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>No image available</Text>
+              </View>
+            ) : null}
+          </View>
 
           {/* Details Content */}
           <View className="p-6">

@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment secrets
+.env
+
+# Google Cloud credentials — NEVER commit service account keys
+credentials/*.json
+# Also catch any key file placed at repo root by mistake
+*-key.json
+*-credentials.json
+
+# Uploaded files (commit the folder, not the contents)
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

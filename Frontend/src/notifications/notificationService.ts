@@ -108,8 +108,7 @@ export const requestPermissions = async (): Promise<boolean> => {
   if (Platform.OS === 'web') return false;
 
   if (!Device.isDevice) {
-    console.log('Must use a physical device for Push Notifications');
-    return false;
+    console.log('Notice: Running on virtual device/emulator. Remote push notifications require a physical device, but local scheduled alerts are fully active.');
   }
 
   try {

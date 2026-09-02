@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { Product } from '../../types/product';
 import { getDaysRemaining, getFreshnessStatus, formatDate } from '../../utils/date';
+import { resolveImageUrl } from '../../utils/image';
 import ConfirmModal from '../ui/ConfirmModal';
 
 interface ProductCardProps {
@@ -59,7 +60,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onDe
       >
         {/* Product Image */}
         <Image
-          source={{ uri: product.image }}
+          source={{ uri: resolveImageUrl(product.image) }}
           className="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800"
           resizeMode="cover"
         />
